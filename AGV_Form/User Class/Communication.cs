@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Windows.Forms;
 using System.Timers;
+using System.Diagnostics;
 
 namespace AGV_Form
 {
@@ -15,6 +16,7 @@ namespace AGV_Form
 
         //public event SerialConnectionHander IsConnected;
         private static SerialPort _serialPort = new SerialPort();
+       
         public static SerialPort SerialPort
         {
             get { return _serialPort; }
@@ -25,20 +27,24 @@ namespace AGV_Form
             }
 
         }
+        public static void Uplabel()
+        {
+            
+        }
         private static List<byte> bytesReceived = new List<byte>();
-        private const ushort PIDInfoReceivePacketSize = 24;
+        private const ushort PIDInfoReceivePacketSize = 20;
         private const ushort PathCompleteReceivePacketSize = 7;
         public static byte currentNode;
         public static char currentOrient;
         public static float speed = 0, line = 0;
         public static int com = 0;
-        public static Int16 countToSendPath2 = 0;
+        public static Int16 countToSendPath2 = 0, resetAGVPath = 0;
         public static System.Timers.Timer timerToSendPath2Again;
         //  public static System.Windows.Forms.Timer timerToSendPath2Again;
         public static void GetDataRecieve()
         {
 
-            int rxBufferSize = 22;
+            int rxBufferSize = 18;
             byte[] rxBuffer = new byte[rxBufferSize];
             int rxByteCount = Communication.SerialPort.Read(rxBuffer, 0, rxBufferSize);
             // add to a list of bytes received
@@ -77,16 +83,20 @@ namespace AGV_Form
                         bytesReceived.RemoveRange(0, startIndex + PIDInfoReceivePacketSize - 1);
 
                         // update AGV info to lists of AGVs (real-time mode)
-                        if (receiveFrame.Header[0] == 0xAA && receiveFrame.Header[1] == 0xFF && receiveFrame.EndOfFrame[0] == 0x0D && receiveFrame.EndOfFrame[1] == 0x0A)
-                        {
+                       // if (receiveFrame.Header[0] == 0xAA && receiveFrame.Header[1] == 0xFF && receiveFrame.EndOfFrame[0] == 0x0D && receiveFrame.EndOfFrame[1] == 0x0A)
+                        
                             speed = receiveFrame.Velocity;
                             //dk_Speed = receiveFrame.UdkVelocity;
                             line = receiveFrame.LinePos;
+                            var agv = AGV.ListAGV.Find(a => a.ID == receiveFrame.AGVID);
+                            if (agv == null) continue;
                             //udk_LinePos = receiveFrame.UdkLinePos;
-                            currentNode = receiveFrame.CurrentNode;
-                            currentOrient = receiveFrame.currentOrient;
-
-                        }
+                            agv.CurrentNode = receiveFrame.CurrentNode;
+                            agv.CurrentOrient = receiveFrame.currentOrient;
+                            agv.Velocity = receiveFrame.Velocity;
+                            agv.DistanceToCurrentNode = receiveFrame.distanceToPreNode;
+                             
+                        
                     }
                     else if (functionCode == 0xC0)      //Xac nhan chay xong Path
                     {
@@ -108,12 +118,21 @@ namespace AGV_Form
                         //string fullpath = "P-2-S-53-N-49-W-44-N-37-G-D-3";
                         //Communication.SendPathData(fullpath);
 
-                        timerToSendPath2Again = new System.Timers.Timer(50);
-                        timerToSendPath2Again.Elapsed += timerToSendPath2Again_Elapsed;
-                        // timerToSendPath2Again.Interval = 50;
-                        timerToSendPath2Again.AutoReset = true;
-                        countToSendPath2 = 10;
-                        sendPath2Frame();
+                        //timerToSendPath2Again = new System.Timers.Timer(50);
+                        //timerToSendPath2Again.Elapsed += timerToSendPath2Again_Elapsed;
+                        //// timerToSendPath2Again.Interval = 50;
+                        //timerToSendPath2Again.AutoReset = true;
+                        //countToSendPath2 = 10;
+                        Debug.Write("123456");
+                        AGV agv = AGV.ListAGV[0];
+                        agv.PathCopmpleted++;
+                        // string fullpath1 = "P-1-S-53-N-49-W-48-W-47-W-46-N-25-N-4-W-3-S-11-G-D-2";
+                        //string fullpath = "N,0,S,11,N,3,W,0,S,42,E,46,G,N,0";
+                        //Communication.SendPathData(fullpath1);
+                        Debug.WriteLine("789");
+                        return;
+                        //
+                        //sendPath2Frame();
 
                         //  timerToSendPath2Again.Enabled = true;
 
@@ -126,7 +145,7 @@ namespace AGV_Form
                         //AGV.ListAGV[0].Tasks.Remove(currentTask);  
 
                     }
-                    else if (functionCode == 0xC1)             //ACK Speed Frame
+                    else if (functionCode == 0xC1)        // ACK Speed
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -140,8 +159,9 @@ namespace AGV_Form
 
                         if (DashboardForm.timerToSendSpeedAgain.Enabled == true)
                             DashboardForm.timerToSendSpeedAgain.Stop();
+
                     }
-                    else if (functionCode == 0xC2)             //ACK Line Frame
+                    else if (functionCode == 0xC2)       //ACK Line
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -155,8 +175,9 @@ namespace AGV_Form
 
                         if (DashboardForm.timerToSendLineAgain.Enabled == true)
                             DashboardForm.timerToSendLineAgain.Stop();
+
                     }
-                    else if (functionCode == 0xC3)             //ACK Path Frame
+                    else if (functionCode == 0xD0)       //NAK Speed
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -168,28 +189,11 @@ namespace AGV_Form
                         PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
                         bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
 
-                        countToSendPath2 = 0;
-                        if (DashboardForm.timerToSendPathAgain.Enabled == true)
-                            DashboardForm.timerToSendPathAgain.Stop();
-                        else if (timerToSendPath2Again.Enabled == true)
-                            timerToSendPath2Again.Stop();
-                    }
-                    else if (functionCode == 0xD0)                  // NAK Speed Frame
-                    {
-                        if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
-
-                        // put data in an array
-                        byte[] data = new byte[PathCompleteReceivePacketSize];
-                        for (int j = 0; j < PathCompleteReceivePacketSize; j++)
-                            data[j] = bytesReceived[startIndex + j];
-
-                        PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
-                        bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
-
-                        DashboardForm.timerToSendSpeedAgain.Enabled = false;
+                        if (DashboardForm.timerToSendSpeedAgain.Enabled == true)
+                            DashboardForm.timerToSendSpeedAgain.Stop();
                         DashboardForm.sendSpeedFrame();
                     }
-                    else if (functionCode == 0xD1)                  // NAK Line Frame
+                    else if (functionCode == 0xD1)       //NAK Line
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -201,10 +205,11 @@ namespace AGV_Form
                         PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
                         bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
 
-                        DashboardForm.timerToSendLineAgain.Enabled = false;
+                        if (DashboardForm.timerToSendLineAgain.Enabled == true)
+                            DashboardForm.timerToSendLineAgain.Stop();
                         DashboardForm.sendLineFrame();
                     }
-                    else if (functionCode == 0xD2)                  // NAK Path Frame
+                    else if (functionCode == 0xC3)       //ACK Path
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -216,31 +221,59 @@ namespace AGV_Form
                         PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
                         bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
 
-                        countToSendPath2++;
-
-                        if (DashboardForm.timerToSendPathAgain.Enabled == true)
+                        if(AGV.ListAGV[0].PathCopmpleted == 1)
                         {
-                            DashboardForm.timerToSendPathAgain.Enabled = false;
-                            DashboardForm.sendPathFrame();
+                            AGV.ListAGV[0].PathCopmpleted = 2;
+                            if (DashboardForm.timerToSendPathAgain.Enabled == true)
+                                DashboardForm.timerToSendPathAgain.Stop();
                         }
-                        else if (timerToSendPath2Again.Enabled == true)
+                        else if(AGV.ListAGV[0].PathCopmpleted == 0)
                         {
-                            timerToSendPath2Again.Enabled = false;
-                            sendPath2Frame();
+                            AGV.ListAGV[0].Tasks[0].Status = "Doing";
+                            AGV.ListAGV[0].Status = "Running";
+                            if (DashboardForm.timerToSendPathAgain.Enabled == true)
+                                DashboardForm.timerToSendPathAgain.Stop();
                         }
-
                     }
+                    else if (functionCode == 0xD2)       //NAK Path
+                    {
+                        if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
+
+                        // put data in an array
+                        byte[] data = new byte[PathCompleteReceivePacketSize];
+                        for (int j = 0; j < PathCompleteReceivePacketSize; j++)
+                            data[j] = bytesReceived[startIndex + j];
+
+                        PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
+                        bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
+
+                        if (AGV.ListAGV[0].PathCopmpleted == 1)
+                        {
+                            AGV.ListAGV[0].PathCopmpleted = 1;
+ 
+                        }
+                        else if (AGV.ListAGV[0].PathCopmpleted == 0)
+                        {
+                              AGV.ListAGV[0].PathCopmpleted = 0;
+                          //  DashboardForm.timerToSendPathAgain.Stop();
+                           // Task currentTask = AGV.ListAGV[0].Tasks[0];
+                          //  currentTask.Status = "Waiting";
+                                // AGV.ListAGV[0].PathCopmpleted = 0;
+                            
+                        }
+                    }
+
 
                 }
             }
         }
 
         public static void sendPath2Frame()
-        {
+        {   
             AGV agv = AGV.ListAGV[0];
             string pick, drop;
             if (AGV.ListAGV[0].Tasks.Count == 0) return;
-            Task currentTask = AGV.ListAGV[0].Tasks[0];
+            Task currentTask = agv.Tasks[0];
 
             if (currentTask.PickLevel == 1 || currentTask.PickLevel == 2 || currentTask.PickLevel == 3)
             {
@@ -260,30 +293,25 @@ namespace AGV_Form
             }
             try
             {
-                AGV.FullPathOfAGV[agv.ID] = pick + agv.CurrentOrient.ToString() + "-" + Navigation.GetNavigationFrame(agv.Path[1], Node.MatrixNodeOrient) + drop;
-                Communication.SendPathData(AGV.FullPathOfAGV[agv.ID]);
+                //Debug.WriteLine("Send Path 2");
+                //AGV.FullPathOfAGV[agv.ID] = pick + agv.CurrentOrient.ToString() + "-" + Navigation.GetNavigationFrame(agv.Path[1], Node.MatrixNodeOrient) + drop;
+                //Communication.SendPathData(AGV.FullPathOfAGV[agv.ID]);
+                //DashboardForm.PathSend = AGV.FullPathOfAGV[agv.ID];
+                //agv.Tasks.Clear();
+                //agv.Path.Clear();
+                // agv.Path.Clear();
+                //agv.Tasks.Remove(currentTask);
+                // agv.Tasks.Clear();
 
-                if (countToSendPath2 == 11)
-                {
-                    agv.Path.Clear();
-                    AGV.ListAGV[0].Tasks.Remove(currentTask);
-                    countToSendPath2 = 0;
-                }
 
             }
             catch { }
 
-            if (timerToSendPath2Again.Enabled == false)
-                timerToSendPath2Again.Start();
 
         }
 
-        // private static void timerToSendPath2Again_Tick(Object source, System.Timers.ElapsedEventArgs e)
-        private static void timerToSendPath2Again_Elapsed(Object source, System.Timers.ElapsedEventArgs e)
-        {
-            timerToSendPath2Again.Stop();
-            sendPath2Frame();
-        }
+       
+       
 
         public static void SendPathData(string fullpath)
         {
@@ -321,7 +349,7 @@ namespace AGV_Form
             //sendFrame.CheckSum = 0xFFFF;
             sendFrame.EndOfFrame = new byte[2] { 0x0A, 0x0D };
             try { Communication.SerialPort.Write(sendFrame.ToArray(), 0, sendFrame.ToArray().Length); }
-            catch { };
+            catch { Debug.WriteLine("SENDATA ERROR"); };
             // wait ack
 
         }
@@ -429,7 +457,6 @@ namespace AGV_Form
                 writer.Write(this.Kd);
                 writer.Write(this.Velocity);
                 writer.Write(this.CheckSum);
-                //   writer.Write(this.CheckSum);
                 writer.Write(this.EndOfFrame);
 
                 return stream.ToArray();
@@ -504,11 +531,12 @@ namespace AGV_Form
             public byte FunctionCode;
             public byte AGVID;
             public float Velocity;
-            public float UdkVelocity;
+            //public float UdkVelocity;
             public float LinePos;
-            public float UdkLinePos;
+            //public float UdkLinePos;
             public byte CurrentNode;
             public char currentOrient;
+            public float distanceToPreNode;
             public byte[] EndOfFrame;
 
 
@@ -525,15 +553,16 @@ namespace AGV_Form
                 s.AGVID = reader.ReadByte();
 
                 s.Velocity = reader.ReadSingle();
-                s.UdkVelocity = reader.ReadSingle();
+              //  s.UdkVelocity = reader.ReadSingle();
                 s.LinePos = reader.ReadSingle();
-                s.UdkLinePos = reader.ReadSingle();
+              //  s.UdkLinePos = reader.ReadSingle();
                 s.CurrentNode = reader.ReadByte();
                 s.currentOrient = reader.ReadChar();
-
+                s.distanceToPreNode = reader.ReadSingle();
+            //    s.CheckSum = reader.ReadUInt16();
                 s.EndOfFrame = reader.ReadBytes(2);
 
-                // s.CheckSum = reader.ReadUInt16();
+             
                 //  s.EndOfFrame = reader.ReadBytes(2);
 
                 return s;
@@ -565,7 +594,7 @@ namespace AGV_Form
 
                 s.EndOfFrame = reader.ReadBytes(2);
 
-                // s.CheckSum = reader.ReadUInt16();
+                // 
                 //  s.EndOfFrame = reader.ReadBytes(2);
 
                 return s;

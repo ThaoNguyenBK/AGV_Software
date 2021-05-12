@@ -34,10 +34,10 @@ namespace AGV_Form
             this.label7 = new System.Windows.Forms.Label();
             this.btnCOMSetting = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.btnPause = new System.Windows.Forms.Button();
+            this.btnConfigPIDLine = new System.Windows.Forms.Button();
             this.imgRun = new System.Windows.Forms.ImageList(this.components);
+            this.btnConfigPIDSpeed = new System.Windows.Forms.Button();
+            this.btnPause = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.btnRun = new System.Windows.Forms.Button();
             this.btnAddAGV = new System.Windows.Forms.Button();
@@ -51,6 +51,9 @@ namespace AGV_Form
             this.imgList = new System.Windows.Forms.ImageList(this.components);
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.rtxtbComStatus = new System.Windows.Forms.RichTextBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
+            this.label21 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -67,6 +70,8 @@ namespace AGV_Form
             this.cntxMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.showPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hidePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.runCurrentAGVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopCurrentAGVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
@@ -216,8 +221,7 @@ namespace AGV_Form
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.btnConfigPIDLine = new System.Windows.Forms.Button();
-            this.btnConfigPIDSpeed = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -262,8 +266,6 @@ namespace AGV_Form
             this.groupBox1.BackColor = System.Drawing.Color.Lavender;
             this.groupBox1.Controls.Add(this.btnConfigPIDLine);
             this.groupBox1.Controls.Add(this.btnConfigPIDSpeed);
-            this.groupBox1.Controls.Add(this.button1);
-            this.groupBox1.Controls.Add(this.button4);
             this.groupBox1.Controls.Add(this.btnPause);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.btnCOMSetting);
@@ -286,25 +288,48 @@ namespace AGV_Form
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Control Pannel";
             // 
-            // button1
+            // btnConfigPIDLine
             // 
-            this.button1.Location = new System.Drawing.Point(231, 121);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 24;
-            this.button1.Text = "run";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btnConfigPIDLine.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.btnConfigPIDLine.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.btnConfigPIDLine.FlatAppearance.BorderColor = System.Drawing.Color.Lavender;
+            this.btnConfigPIDLine.FlatAppearance.BorderSize = 0;
+            this.btnConfigPIDLine.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConfigPIDLine.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.btnConfigPIDLine.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnConfigPIDLine.ImageList = this.imgRun;
+            this.btnConfigPIDLine.Location = new System.Drawing.Point(171, 62);
+            this.btnConfigPIDLine.Name = "btnConfigPIDLine";
+            this.btnConfigPIDLine.Size = new System.Drawing.Size(80, 32);
+            this.btnConfigPIDLine.TabIndex = 30;
+            this.btnConfigPIDLine.Text = "PID Line";
+            this.btnConfigPIDLine.UseVisualStyleBackColor = false;
+            this.btnConfigPIDLine.Click += new System.EventHandler(this.btnConfigPIDLine_Click);
             // 
-            // button4
+            // imgRun
             // 
-            this.button4.Location = new System.Drawing.Point(311, 120);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 26;
-            this.button4.Text = "wait";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.imgRun.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imgRun.ImageStream")));
+            this.imgRun.TransparentColor = System.Drawing.Color.Transparent;
+            this.imgRun.Images.SetKeyName(0, "icon_pause.png");
+            this.imgRun.Images.SetKeyName(1, "icon_run.png");
+            // 
+            // btnConfigPIDSpeed
+            // 
+            this.btnConfigPIDSpeed.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.btnConfigPIDSpeed.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.btnConfigPIDSpeed.FlatAppearance.BorderColor = System.Drawing.Color.Lavender;
+            this.btnConfigPIDSpeed.FlatAppearance.BorderSize = 0;
+            this.btnConfigPIDSpeed.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnConfigPIDSpeed.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.btnConfigPIDSpeed.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnConfigPIDSpeed.ImageList = this.imgRun;
+            this.btnConfigPIDSpeed.Location = new System.Drawing.Point(82, 62);
+            this.btnConfigPIDSpeed.Name = "btnConfigPIDSpeed";
+            this.btnConfigPIDSpeed.Size = new System.Drawing.Size(80, 32);
+            this.btnConfigPIDSpeed.TabIndex = 29;
+            this.btnConfigPIDSpeed.Text = "PID Speed";
+            this.btnConfigPIDSpeed.UseVisualStyleBackColor = false;
+            this.btnConfigPIDSpeed.Click += new System.EventHandler(this.btnConfigPIDSpeed_Click);
             // 
             // btnPause
             // 
@@ -324,13 +349,6 @@ namespace AGV_Form
             this.btnPause.Text = "   Pause";
             this.btnPause.UseVisualStyleBackColor = false;
             this.btnPause.Click += new System.EventHandler(this.btnPause_Click);
-            // 
-            // imgRun
-            // 
-            this.imgRun.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imgRun.ImageStream")));
-            this.imgRun.TransparentColor = System.Drawing.Color.Transparent;
-            this.imgRun.Images.SetKeyName(0, "icon_pause.png");
-            this.imgRun.Images.SetKeyName(1, "icon_run.png");
             // 
             // label4
             // 
@@ -472,8 +490,6 @@ namespace AGV_Form
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.BackColor = System.Drawing.Color.Lavender;
             this.groupBox6.Controls.Add(this.rtxtbComStatus);
-            this.groupBox6.Controls.Add(this.label19);
-            this.groupBox6.Controls.Add(this.label20);
             this.groupBox6.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox6.ForeColor = System.Drawing.Color.Navy;
             this.groupBox6.Location = new System.Drawing.Point(15, 505);
@@ -496,21 +512,48 @@ namespace AGV_Form
             this.rtxtbComStatus.TabIndex = 5;
             this.rtxtbComStatus.Text = "";
             // 
+            // label22
+            // 
+            this.label22.Location = new System.Drawing.Point(238, 713);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(554, 20);
+            this.label22.TabIndex = 18;
+            this.label22.Text = "label22";
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(157, 695);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 17;
+            this.button3.Text = "7";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click_1);
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(438, 700);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(41, 13);
+            this.label21.TabIndex = 6;
+            this.label21.Text = "label21";
+            // 
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(248, 10);
+            this.label19.Location = new System.Drawing.Point(238, 700);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(56, 20);
+            this.label19.Size = new System.Drawing.Size(41, 13);
             this.label19.TabIndex = 2;
             this.label19.Text = "label19";
             // 
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(358, 10);
+            this.label20.Location = new System.Drawing.Point(348, 700);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(58, 20);
+            this.label20.Size = new System.Drawing.Size(41, 13);
             this.label20.TabIndex = 3;
             this.label20.Text = "label20";
             // 
@@ -764,9 +807,11 @@ namespace AGV_Form
             // 
             this.cntxMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.showPathToolStripMenuItem,
-            this.hidePathToolStripMenuItem});
+            this.hidePathToolStripMenuItem,
+            this.runCurrentAGVToolStripMenuItem,
+            this.stopCurrentAGVToolStripMenuItem});
             this.cntxMenuStrip.Name = "cntxMenuStrip";
-            this.cntxMenuStrip.Size = new System.Drawing.Size(172, 48);
+            this.cntxMenuStrip.Size = new System.Drawing.Size(172, 92);
             this.cntxMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cntxMenuStrip_Opening);
             // 
             // showPathToolStripMenuItem
@@ -783,6 +828,20 @@ namespace AGV_Form
             this.hidePathToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.hidePathToolStripMenuItem.Text = "Hide current path";
             this.hidePathToolStripMenuItem.Click += new System.EventHandler(this.hidePathToolStripMenuItem_Click);
+            // 
+            // runCurrentAGVToolStripMenuItem
+            // 
+            this.runCurrentAGVToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("runCurrentAGVToolStripMenuItem.Image")));
+            this.runCurrentAGVToolStripMenuItem.Name = "runCurrentAGVToolStripMenuItem";
+            this.runCurrentAGVToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.runCurrentAGVToolStripMenuItem.Text = "Run current AGV";
+            // 
+            // stopCurrentAGVToolStripMenuItem
+            // 
+            this.stopCurrentAGVToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("stopCurrentAGVToolStripMenuItem.Image")));
+            this.stopCurrentAGVToolStripMenuItem.Name = "stopCurrentAGVToolStripMenuItem";
+            this.stopCurrentAGVToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
+            this.stopCurrentAGVToolStripMenuItem.Text = "Stop current AGV";
             // 
             // label16
             // 
@@ -2365,11 +2424,11 @@ namespace AGV_Form
             // timerListview
             // 
             this.timerListview.Enabled = true;
-            this.timerListview.Interval = 250;
             this.timerListview.Tick += new System.EventHandler(this.timerListview_Tick);
             // 
             // timerSimAGV
             // 
+            this.timerSimAGV.Interval = 250;
             this.timerSimAGV.Tick += new System.EventHandler(this.timerSimAGV_Tick);
             // 
             // groupBox3
@@ -2455,41 +2514,15 @@ namespace AGV_Form
             this.imageList1.Images.SetKeyName(2, "South_Direction.png.png");
             this.imageList1.Images.SetKeyName(3, "West_Direction.png.png");
             // 
-            // btnConfigPIDLine
+            // button1
             // 
-            this.btnConfigPIDLine.BackColor = System.Drawing.Color.LightSteelBlue;
-            this.btnConfigPIDLine.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.btnConfigPIDLine.FlatAppearance.BorderColor = System.Drawing.Color.Lavender;
-            this.btnConfigPIDLine.FlatAppearance.BorderSize = 0;
-            this.btnConfigPIDLine.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnConfigPIDLine.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btnConfigPIDLine.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnConfigPIDLine.ImageList = this.imgRun;
-            this.btnConfigPIDLine.Location = new System.Drawing.Point(171, 62);
-            this.btnConfigPIDLine.Name = "btnConfigPIDLine";
-            this.btnConfigPIDLine.Size = new System.Drawing.Size(80, 32);
-            this.btnConfigPIDLine.TabIndex = 30;
-            this.btnConfigPIDLine.Text = "PID Line";
-            this.btnConfigPIDLine.UseVisualStyleBackColor = false;
-            this.btnConfigPIDLine.Click += new System.EventHandler(this.btnConfigPIDLine_Click);
-            // 
-            // btnConfigPIDSpeed
-            // 
-            this.btnConfigPIDSpeed.BackColor = System.Drawing.Color.LightSteelBlue;
-            this.btnConfigPIDSpeed.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.btnConfigPIDSpeed.FlatAppearance.BorderColor = System.Drawing.Color.Lavender;
-            this.btnConfigPIDSpeed.FlatAppearance.BorderSize = 0;
-            this.btnConfigPIDSpeed.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnConfigPIDSpeed.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.btnConfigPIDSpeed.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnConfigPIDSpeed.ImageList = this.imgRun;
-            this.btnConfigPIDSpeed.Location = new System.Drawing.Point(82, 62);
-            this.btnConfigPIDSpeed.Name = "btnConfigPIDSpeed";
-            this.btnConfigPIDSpeed.Size = new System.Drawing.Size(80, 32);
-            this.btnConfigPIDSpeed.TabIndex = 29;
-            this.btnConfigPIDSpeed.Text = "PID Speed";
-            this.btnConfigPIDSpeed.UseVisualStyleBackColor = false;
-            this.btnConfigPIDSpeed.Click += new System.EventHandler(this.btnConfigPIDSpeed_Click);
+            this.button1.Location = new System.Drawing.Point(76, 700);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 31;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // DashboardForm
             // 
@@ -2497,9 +2530,15 @@ namespace AGV_Form
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(1370, 730);
+            this.Controls.Add(this.label22);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.label21);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.label19);
             this.Controls.Add(this.groupBox6);
+            this.Controls.Add(this.label20);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.groupBox5);
@@ -2509,7 +2548,6 @@ namespace AGV_Form
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox6.ResumeLayout(false);
-            this.groupBox6.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
             this.pnFloor.ResumeLayout(false);
@@ -2705,10 +2743,14 @@ namespace AGV_Form
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button btnConfigPIDLine;
         private System.Windows.Forms.Button btnConfigPIDSpeed;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.ToolStripMenuItem runCurrentAGVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stopCurrentAGVToolStripMenuItem;
+        private System.Windows.Forms.Button button1;
     }
 }

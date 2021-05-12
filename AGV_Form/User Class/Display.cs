@@ -49,7 +49,7 @@ namespace AGV_Form
                 listView.Items[listView.Items.Count - 1].SubItems.Add(agv.CurrentNode.ToString());
                 listView.Items[listView.Items.Count - 1].SubItems.Add(agv.CurrentOrient.ToString());
                 listView.Items[listView.Items.Count - 1].SubItems.Add((Math.Round(agv.DistanceToCurrentNode, 2)).ToString() + " cm");
-                listView.Items[listView.Items.Count - 1].SubItems.Add(agv.Velocity.ToString() + " cm/s");
+                listView.Items[listView.Items.Count - 1].SubItems.Add(agv.Velocity.ToString().Trim() + " cm/s");
                 if (agv.Status == "Running")
                     listView.Items[listData.IndexOf(agv)].BackColor = Color.PaleGreen;
                 else
@@ -65,8 +65,8 @@ namespace AGV_Form
             AGV agv = AGV.SimListAGV[index];
             //List<char> fullpath = AGV.FullPathOfAGV[agvID].ToList();
 
-            string[] frameArr = AGV.FullPathOfAGV[agvID].Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
-
+            string[] frameArr = AGV.SimFullPathOfAGV[agvID].Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+            
             Point oldAGVPosition = Display.SimLabelAGV[agvID].Location;
             Point newAGVPosition = new Point();
             Point oldPalletPosition = Display.SimLabelPalletInAGV[agvID].Location;
@@ -75,6 +75,11 @@ namespace AGV_Form
             Size newPalletSize = new Size();
 
             int indexNode = Array.FindIndex(frameArr, a => a == agv.CurrentNode.ToString());
+            if (agv.Stop)
+            {
+                agv.Status = "Stoping";
+                return;
+            } 
             if (agv.IsColision) return;
             if (frameArr[indexNode + 1] == "G" || frameArr[indexNode + 1] == null)
             {
@@ -128,7 +133,7 @@ namespace AGV_Form
                             agv.CurrentOrient = Display.UpdateOrient(frameArr[indexNode + 3]);
                     }
                     
-                    agv.Status = "Running";
+                   // agv.Status = "Running";
                     SimLabelAGV[agv.ID].BackColor = Color.CornflowerBlue;
                         
                        
