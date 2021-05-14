@@ -490,6 +490,8 @@ namespace AGV_Form
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.BackColor = System.Drawing.Color.Lavender;
             this.groupBox6.Controls.Add(this.rtxtbComStatus);
+            this.groupBox6.Controls.Add(this.button1);
+            this.groupBox6.Controls.Add(this.label19);
             this.groupBox6.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox6.ForeColor = System.Drawing.Color.Navy;
             this.groupBox6.Location = new System.Drawing.Point(15, 505);
@@ -505,7 +507,7 @@ namespace AGV_Form
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rtxtbComStatus.BackColor = System.Drawing.Color.WhiteSmoke;
             this.rtxtbComStatus.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.rtxtbComStatus.Font = new System.Drawing.Font("Segoe UI", 9.25F);
+            this.rtxtbComStatus.Font = new System.Drawing.Font("Segoe UI", 11.25F);
             this.rtxtbComStatus.Location = new System.Drawing.Point(6, 26);
             this.rtxtbComStatus.Name = "rtxtbComStatus";
             this.rtxtbComStatus.Size = new System.Drawing.Size(569, 117);
@@ -514,9 +516,9 @@ namespace AGV_Form
             // 
             // label22
             // 
-            this.label22.Location = new System.Drawing.Point(238, 713);
+            this.label22.Location = new System.Drawing.Point(395, 701);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(554, 20);
+            this.label22.Size = new System.Drawing.Size(166, 20);
             this.label22.TabIndex = 18;
             this.label22.Text = "label22";
             // 
@@ -542,9 +544,9 @@ namespace AGV_Form
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(238, 700);
+            this.label19.Location = new System.Drawing.Point(296, 6);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(41, 13);
+            this.label19.Size = new System.Drawing.Size(56, 20);
             this.label19.TabIndex = 2;
             this.label19.Text = "label19";
             // 
@@ -2428,7 +2430,6 @@ namespace AGV_Form
             // 
             // timerSimAGV
             // 
-            this.timerSimAGV.Interval = 250;
             this.timerSimAGV.Tick += new System.EventHandler(this.timerSimAGV_Tick);
             // 
             // groupBox3
@@ -2516,7 +2517,7 @@ namespace AGV_Form
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(76, 700);
+            this.button1.Location = new System.Drawing.Point(189, 0);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 31;
@@ -2531,12 +2532,10 @@ namespace AGV_Form
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(1370, 730);
             this.Controls.Add(this.label22);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.label21);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.label19);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.label20);
             this.Controls.Add(this.groupBox2);
@@ -2548,6 +2547,7 @@ namespace AGV_Form
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
             this.pnFloor.ResumeLayout(false);

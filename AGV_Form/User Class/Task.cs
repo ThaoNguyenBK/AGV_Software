@@ -56,10 +56,10 @@ namespace AGV_Form
                     agv.Path.Add(Algorithm.A_starFindPath(Node.ListNode, Node.MatrixNodeDistance, agv.CurrentNode, agv.Tasks[0].PickNode));
                     AGV.FullPathOfAGV[agv.ID] = "N-0-"+agv.CurrentOrient+"-"+  Navigation.GetNavigationFrame(agv.Path[0], Node.MatrixNodeOrient)+"-N-0";
                     Communication.SendPathData(AGV.FullPathOfAGV[agv.ID]);
-                    DashboardForm.PathSend = AGV.FullPathOfAGV[agv.ID];
+                    Display.UpdateComStatus("send",agv.ID,"Send Path 1", Color.Green);
 
-                    if(DashboardForm.timerToSendPathAgain.Enabled == false)
-                         DashboardForm.timerToSendPathAgain.Start();
+                   // if(DashboardForm.timerToSendPathAgain.Enabled == false)
+                      //   DashboardForm.timerToSendPathAgain.Start();
 
                   //  agv.Tasks[0].Status = "Doing";
                     agv.PathCopmpleted = 0;
@@ -90,12 +90,12 @@ namespace AGV_Form
                     AGV.FullPathOfAGV[agv.ID] = pick+agv.CurrentOrient+"-" + Navigation.GetNavigationFrame(agv.Path[0], Node.MatrixNodeOrient)+drop;
                     Communication.SendPathData(AGV.FullPathOfAGV[agv.ID]);
 
-                    DashboardForm.PathSend = AGV.FullPathOfAGV[agv.ID];
+                    Display.UpdateComStatus("send", agv.ID, "Send Path 2", Color.Green);
 
-                    if (DashboardForm.timerToSendPathAgain.Enabled == false)
-                        DashboardForm.timerToSendPathAgain.Start();
+                    // if (DashboardForm.timerToSendPathAgain.Enabled == false)
+                    //    DashboardForm.timerToSendPathAgain.Start();
 
-                  //  agv.PathCopmpleted = 2;
+                    //  agv.PathCopmpleted = 2;
                 }
                 else if (agv.CurrentNode == currentTask.DropNode && currentTask.Status == "Doing" && agv.PathCopmpleted == 3)
                 {
@@ -128,11 +128,10 @@ namespace AGV_Form
                     agv.Path.Clear();
                     agv.Path.Add(Algorithm.A_starFindPath(Node.ListNode, Node.MatrixNodeDistance, agv.CurrentNode, agv.Tasks[0].PickNode));
                     AGV.SimFullPathOfAGV[agv.ID] = Navigation.GetNavigationFrame(agv.Path[0], Node.MatrixNodeOrient);
-                    //agv.Path.RemoveAt(0);
                     agv.Tasks[0].Status = "Doing";
-                    agv.PathCopmpleted = 0;
-                    
+                    agv.PathCopmpleted = 0;                   
                     agv.Status = "Running";
+                    Display.SimLabelAGV[agv.ID].BackColor = Color.CornflowerBlue;
                 }
 
                 else if (agv.CurrentNode == currentTask.PickNode && currentTask.Status == "Doing" && agv.PathCopmpleted == 1)
@@ -192,9 +191,6 @@ namespace AGV_Form
 
 
                 }
-                
-                       
-                        
             }     
             else
             {

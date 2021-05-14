@@ -10,7 +10,7 @@ namespace AGV_Form
 {
     class DBUtility
     {
-        private const string connectionStr = @"Data Source=DESKTOP-UML28IP\WINCCPLUSMIG2014;Initial Catalog=AGV_Datasource;Integrated Security=True";
+        private const string connectionStr = @"Data Source=DESKTOP-TN7L9R8\PERFECT;Initial Catalog=AGV_Datasource;Integrated Security=True";
         public static dynamic GetDataFromDB<T>(string tableName)
         {
             List<Node> listNode = new List<Node>();

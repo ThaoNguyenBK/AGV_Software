@@ -17,6 +17,8 @@ namespace AGV_Form
     {
 
         public static string PathSend;
+        public static List<string> textComStatus = new List<string>();
+        public static List<Color> colorComStatus = new List<Color>();
         public DashboardForm()
         {
             InitializeComponent();
@@ -79,6 +81,8 @@ namespace AGV_Form
             if (rdbtnSimulation.Checked)
             {
                 lbModeStatus.Text = "Simulation Mode.";
+                timerListview.Interval = 100;
+                timerSimAGV.Interval = 100;
                 Display.Mode = "Simulation";
                 foreach (AGV agv in AGV.ListAGV)
                 {
@@ -115,6 +119,8 @@ namespace AGV_Form
             if (rdbtnRealTime.Checked)
             {
                 lbModeStatus.Text = "Realtime Mode.";
+                timerListview.Interval = 100;
+                timerSimAGV.Interval = 250;
                 Display.Mode = "Real Time";
                 foreach (AGV agv in AGV.SimListAGV)
                 {
@@ -147,16 +153,29 @@ namespace AGV_Form
 
         private void timerListview_Tick(object sender, EventArgs e)
         {
-            
+            if (textComStatus.Count != 0)
+            {
+                rtxtbComStatus.SelectionColor = colorComStatus[0];
+                rtxtbComStatus.SelectedText = textComStatus[0];
+
+                textComStatus.RemoveAt(0);
+                colorComStatus.RemoveAt(0);
+            }
+
             switch (Display.Mode)
             {
                 case "Real Time":
                     // Update data in listView AGVs
                     Display.UpdateListViewAGVs(listViewAGVs, AGV.ListAGV);
                     if(AGV.ListAGV.Count >0)
-                    Display.UpdateListViewTasks(listViewTask,AGV.ListAGV[0].Tasks);
+                    {
+                        Display.UpdateListViewTasks(listViewTask, AGV.ListAGV[0].Tasks);
+                        Display.UpdatePositionAGV(AGV.ListAGV[0].ID, Display.LabelAGV[AGV.ListAGV[0].ID]);
+                    }
+                    
                     // Do something here
-
+                    // Update serial port status
+                  
                     break;
                 case "Simulation":
                     // Update data in listView AGVs
@@ -168,11 +187,10 @@ namespace AGV_Form
 
                     break;
             }
-            if(AGV.SimListAGV.Count >=2)
-            Collision.DetectColission(AGV.SimListAGV[0], AGV.SimListAGV[1]);
-            label19.Text = Math.Round(Collision.dis1,2).ToString();
-            label20.Text = Math.Round(Collision.dis2,2).ToString();
-            label21.Text = Collision.CollisionType.ToString();
+           ///if(AGV.SimListAGV.Count >=2)
+          /// Collision.DetectColission(AGV.SimListAGV[0], AGV.SimListAGV[1]);
+
+            //label21.Text = Collision.CollisionType.ToString();
 
         }
         private void pnFloor_Paint(object sender, PaintEventArgs e)
@@ -192,21 +210,7 @@ namespace AGV_Form
         {
             // Clone a list for ListAGV (amazing way to clone a reference type)
             List<AGV> oldSimListAGV = new List<AGV>();
-            switch (Display.Mode)
-            {
-                case "Real Time":
-                    AGV.ListAGV.ForEach((a) =>
-                    {
-                        oldSimListAGV.Add(new AGV(a.ID, a.CurrentNode, a.CurrentOrient, a.DistanceToCurrentNode, a.Status));
-                    });
-                    break;
-                case "Simulation":
-                    AGV.SimListAGV.ForEach((a) =>
-                    {
-                        oldSimListAGV.Add(new AGV(a.ID, a.CurrentNode, a.CurrentOrient, a.DistanceToCurrentNode, a.Status));
-                    });
-                    break;
-            }
+          
             using (AddRemoveAGVForm AddRemoveForm = new AddRemoveAGVForm())
             {
                 AddRemoveForm.ShowDialog();
@@ -334,6 +338,8 @@ namespace AGV_Form
                 case "Simulation":
                     AGV agv = AGV.SimListAGV.Find(a => a.ID == agvID);
                     agv.Stop = true;
+                    agv.Status = "Stopping";
+                    Display.SimLabelAGV[agv.ID].BackColor = Color.Red;
                     break;
             }
         }
@@ -351,6 +357,8 @@ namespace AGV_Form
                 case "Simulation":
                     AGV agv = AGV.SimListAGV.Find(a=>a.ID == agvID);
                     agv.Stop = false;
+                    agv.Status = "Running";
+                    Display.SimLabelAGV[agv.ID].BackColor = Color.CornflowerBlue;
                     break;
             }
         }
@@ -417,9 +425,9 @@ namespace AGV_Form
             switch (Display.Mode)
             {
                 case "Real Time":
-                    timerToSendPathAgain = new System.Windows.Forms.Timer();
-                    timerToSendPathAgain.Tick += new EventHandler(timerToSendPathAgain_Tick);
-                    timerToSendPathAgain.Interval = 100;
+                  //  timerToSendPathAgain = new System.Windows.Forms.Timer();
+                   // timerToSendPathAgain.Tick += new EventHandler(timerToSendPathAgain_Tick);
+                  //  timerToSendPathAgain.Interval = 100;
                   /*  timerToSendPath2Again = new System.Windows.Forms.Timer();
                     timerToSendPath2Again.Tick += new EventHandler(timerToSendPath2Again_Tick);
                     timerToSendPath2Again.Interval = 400;   */
@@ -589,33 +597,7 @@ namespace AGV_Form
         private void button4_Click(object sender, EventArgs e)
         {
             AGV.SimListAGV[1].Stop = true;
-            //AGV agv = AGV.ListAGV[0];
-            //string pick, drop;
-
-            //string send;
-            //Task currentTask = AGV.ListAGV[0].Tasks[0];
-            //if (currentTask.PickLevel == 1 || currentTask.PickLevel == 2 || currentTask.PickLevel == 3)
-            //{
-            //    pick = "P-" + currentTask.PickLevel.ToString() + "-";
-            //}
-            //else
-            //{
-            //    pick = "N-0-";
-            //}
-            //if (currentTask.DropLevel == 1 || currentTask.DropLevel == 2 || currentTask.DropLevel == 3)
-            //{
-            //    drop = "-D-" + currentTask.DropLevel.ToString() ;
-            //}
-            //else
-            //{
-            //    drop = "-N-0";
-            //}
-            //agv.Path.Add(Algorithm.A_starFindPath(Node.ListNode, Node.MatrixNodeDistance, agv.Tasks[0].PickNode, agv.Tasks[0].DropNode));
-            //send = pick + "S" + "-" + Navigation.GetNavigationFrame(agv.Path[1], Node.MatrixNodeOrient) + drop;
-            //label20.Text = send;
-            ////send.Trim();
-            /////Communication.SendPathData(send);
-            //agv.Path.Clear();
+          
         }
 
         
@@ -638,7 +620,7 @@ namespace AGV_Form
         {
             timerToSendLineAgain = new System.Windows.Forms.Timer();
             timerToSendLineAgain.Tick += new EventHandler(timerToSendLineAgain_Tick);
-            timerToSendLineAgain.Interval = 100;
+            timerToSendLineAgain.Interval = 400;
             sendLineFrame();
          //   Thread thrdSendLineFrame = new Thread(sendLineFrame);
          // thrdSendLineFrame.IsBackground = true;
@@ -704,7 +686,7 @@ namespace AGV_Form
         {
             timerToSendSpeedAgain = new System.Windows.Forms.Timer();
             timerToSendSpeedAgain.Tick += new EventHandler(timerToSendSpeedAgain_Tick);
-            timerToSendSpeedAgain.Interval = 100;
+            timerToSendSpeedAgain.Interval = 400;
             sendSpeedFrame();
           // Thread thrdSendSpeedFrame = new Thread(sendSpeedFrame);
           // thrdSendSpeedFrame.IsBackground = true;
@@ -754,11 +736,11 @@ namespace AGV_Form
 
         private void button1_Click(object sender, EventArgs e)
         {
-            AGV.ListAGV[0].CurrentOrient = 'N';
-            AGV.ListAGV[0].CurrentNode = 11;
-            AGV.ListAGV[0].Tasks.Clear();
-            AGV.ListAGV[0].Path.Clear();
-
+           // label19.Text= Collision. (45).ToString();
+            //AGV.ListAGV[0].CurrentOrient = 'N';
+            //AGV.ListAGV[0].CurrentNode = 11;
+            //AGV.ListAGV[0].Tasks.Clear();
+            //AGV.ListAGV[0].Path.Clear();
         }
     }
 }

@@ -7,6 +7,7 @@ using System.IO.Ports;
 using System.Windows.Forms;
 using System.Timers;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace AGV_Form
 {
@@ -16,7 +17,8 @@ namespace AGV_Form
 
         //public event SerialConnectionHander IsConnected;
         private static SerialPort _serialPort = new SerialPort();
-       
+        private static int FlagPath1Complete = 0;
+        private static int FlagPath2Complete = 0;
         public static SerialPort SerialPort
         {
             get { return _serialPort; }
@@ -34,12 +36,10 @@ namespace AGV_Form
         private static List<byte> bytesReceived = new List<byte>();
         private const ushort PIDInfoReceivePacketSize = 20;
         private const ushort PathCompleteReceivePacketSize = 7;
-        public static byte currentNode;
-        public static char currentOrient;
+
         public static float speed = 0, line = 0;
         public static int com = 0;
         public static Int16 countToSendPath2 = 0, resetAGVPath = 0;
-        public static System.Timers.Timer timerToSendPath2Again;
         //  public static System.Windows.Forms.Timer timerToSendPath2Again;
         public static void GetDataRecieve()
         {
@@ -91,16 +91,17 @@ namespace AGV_Form
                             var agv = AGV.ListAGV.Find(a => a.ID == receiveFrame.AGVID);
                             if (agv == null) continue;
                             //udk_LinePos = receiveFrame.UdkLinePos;
+                            //if(receiveFrame.CurrentNode >=0 || receiveFrame.CurrentNode <= 56)    
                             agv.CurrentNode = receiveFrame.CurrentNode;
                             agv.CurrentOrient = receiveFrame.currentOrient;
                             agv.Velocity = receiveFrame.Velocity;
                             agv.DistanceToCurrentNode = receiveFrame.distanceToPreNode;
-                             
-                        
+                            //Display.UpdateComStatus("receive", agv.ID, "Receive AGV Information", Color.Green);
+
                     }
-                    else if (functionCode == 0xC0)      //Xac nhan chay xong Path
+                    if (functionCode == 0xE0)      //Xac nhan chay xong Path1
                     {
-                        //com++;
+                      
                         // waitting for receive enough frame data of this function code
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -111,41 +112,40 @@ namespace AGV_Form
 
                         PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
                         bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
-                        //if(receiveFrame.IsComplete == 0x05)
-                        // {
 
-                        //}
-                        //string fullpath = "P-2-S-53-N-49-W-44-N-37-G-D-3";
-                        //Communication.SendPathData(fullpath);
-
-                        //timerToSendPath2Again = new System.Timers.Timer(50);
-                        //timerToSendPath2Again.Elapsed += timerToSendPath2Again_Elapsed;
-                        //// timerToSendPath2Again.Interval = 50;
-                        //timerToSendPath2Again.AutoReset = true;
-                        //countToSendPath2 = 10;
-                        Debug.Write("123456");
+                        Debug.Write("PathRun_Completed");
                         AGV agv = AGV.ListAGV[0];
-                        agv.PathCopmpleted++;
-                        // string fullpath1 = "P-1-S-53-N-49-W-48-W-47-W-46-N-25-N-4-W-3-S-11-G-D-2";
-                        //string fullpath = "N,0,S,11,N,3,W,0,S,42,E,46,G,N,0";
-                        //Communication.SendPathData(fullpath1);
-                        Debug.WriteLine("789");
-                        return;
-                        //
-                        //sendPath2Frame();
-
-                        //  timerToSendPath2Again.Enabled = true;
-
-                        //label20.Text = AGV.FullPathOfAGV[agv.ID];
-                        // timerToSendPath2Again = new System.Windows.Forms.Timer();
-
-
-
-                        //  agv.Path.Clear();
-                        //AGV.ListAGV[0].Tasks.Remove(currentTask);  
+                        agv.PathCopmpleted = 1;
+                        Debug.WriteLine("PathComplete = 1");
+                        FlagPath1Complete++;
+                        if(FlagPath1Complete==1)
+                        Display.UpdateComStatus("receive", agv.ID, " AGV Complete Path 1", Color.Green);
 
                     }
-                    else if (functionCode == 0xC1)        // ACK Speed
+                    if (functionCode == 0xE1)      //Xac nhan chay xong Path2
+                    {
+
+                        // waitting for receive enough frame data of this function code
+                        if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
+
+                        // put data in an array
+                        byte[] data = new byte[PathCompleteReceivePacketSize];
+                        for (int j = 0; j < PathCompleteReceivePacketSize; j++)
+                            data[j] = bytesReceived[startIndex + j];
+
+                        PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
+                        bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
+
+                        Debug.Write("PathRun_Completed");
+                        AGV agv = AGV.ListAGV[0];
+                        agv.PathCopmpleted = 3;
+                        Debug.WriteLine("PathComplete = 3");
+                        FlagPath2Complete++;
+                        if(FlagPath2Complete==1)
+                        Display.UpdateComStatus("receive", agv.ID, " AGV Complete Path 2", Color.Green);
+
+                    }
+                    if (functionCode == 0xC1)        // ACK Speed
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -159,9 +159,26 @@ namespace AGV_Form
 
                         if (DashboardForm.timerToSendSpeedAgain.Enabled == true)
                             DashboardForm.timerToSendSpeedAgain.Stop();
-
+                        Display.UpdateComStatus("receive", receiveFrame.AGVID, " ACK Speed", Color.Green);
                     }
-                    else if (functionCode == 0xC2)       //ACK Line
+
+                    else if (functionCode == 0xD0)       //NAK Speed
+                    {
+                        if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
+
+                        // put data in an array
+                        byte[] data = new byte[PathCompleteReceivePacketSize];
+                        for (int j = 0; j < PathCompleteReceivePacketSize; j++)
+                            data[j] = bytesReceived[startIndex + j];
+
+                        PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
+                        bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
+                        Display.UpdateComStatus("receive", receiveFrame.AGVID, " NAK Speed", Color.Red);
+                        //   if (DashboardForm.timerToSendSpeedAgain.Enabled == true)
+                        //     DashboardForm.timerToSendSpeedAgain.Stop();
+                        DashboardForm.sendSpeedFrame();
+                    }
+                    if (functionCode == 0xC2)       //ACK Line
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -175,24 +192,9 @@ namespace AGV_Form
 
                         if (DashboardForm.timerToSendLineAgain.Enabled == true)
                             DashboardForm.timerToSendLineAgain.Stop();
-
+                        Display.UpdateComStatus("receive", receiveFrame.AGVID, " ACK Line", Color.Green);
                     }
-                    else if (functionCode == 0xD0)       //NAK Speed
-                    {
-                        if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
-
-                        // put data in an array
-                        byte[] data = new byte[PathCompleteReceivePacketSize];
-                        for (int j = 0; j < PathCompleteReceivePacketSize; j++)
-                            data[j] = bytesReceived[startIndex + j];
-
-                        PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
-                        bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
-
-                        if (DashboardForm.timerToSendSpeedAgain.Enabled == true)
-                            DashboardForm.timerToSendSpeedAgain.Stop();
-                        DashboardForm.sendSpeedFrame();
-                    }
+                   
                     else if (functionCode == 0xD1)       //NAK Line
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
@@ -205,11 +207,12 @@ namespace AGV_Form
                         PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
                         bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
 
-                        if (DashboardForm.timerToSendLineAgain.Enabled == true)
-                            DashboardForm.timerToSendLineAgain.Stop();
+                       // if (DashboardForm.timerToSendLineAgain.Enabled == true)
+                       //     DashboardForm.timerToSendLineAgain.Stop();
                         DashboardForm.sendLineFrame();
+                        Display.UpdateComStatus("receive", receiveFrame.AGVID, " NAK Line", Color.Red);
                     }
-                    else if (functionCode == 0xC3)       //ACK Path
+                    if (functionCode == 0xC3)       //ACK Path
                     {
                         if (bytesReceived.Count - startIndex < PathCompleteReceivePacketSize) return;
 
@@ -220,20 +223,23 @@ namespace AGV_Form
 
                         PathCompleteRecievePacket receiveFrame = PathCompleteRecievePacket.FromArray(data);
                         bytesReceived.RemoveRange(0, startIndex + PathCompleteReceivePacketSize - 1);
-
-                        if(AGV.ListAGV[0].PathCopmpleted == 1)
+                        FlagPath1Complete = 0;
+                        FlagPath2Complete = 0;
+                        if (AGV.ListAGV[0].PathCopmpleted == 1)
                         {
                             AGV.ListAGV[0].PathCopmpleted = 2;
-                            if (DashboardForm.timerToSendPathAgain.Enabled == true)
-                                DashboardForm.timerToSendPathAgain.Stop();
+                            //if (DashboardForm.timerToSendPathAgain.Enabled == true)
+                             //   DashboardForm.timerToSendPathAgain.Stop();
                         }
                         else if(AGV.ListAGV[0].PathCopmpleted == 0)
                         {
                             AGV.ListAGV[0].Tasks[0].Status = "Doing";
                             AGV.ListAGV[0].Status = "Running";
-                            if (DashboardForm.timerToSendPathAgain.Enabled == true)
-                                DashboardForm.timerToSendPathAgain.Stop();
+                          //  if (DashboardForm.timerToSendPathAgain.Enabled == true)
+                            //    DashboardForm.timerToSendPathAgain.Stop();
                         }
+                        Debug.WriteLine("AcK Path");
+                        Display.UpdateComStatus("receive", receiveFrame.AGVID, " ACK Path", Color.Green);
                     }
                     else if (functionCode == 0xD2)       //NAK Path
                     {
@@ -261,6 +267,8 @@ namespace AGV_Form
                                 // AGV.ListAGV[0].PathCopmpleted = 0;
                             
                         }
+                        Debug.WriteLine("NAK Path");
+                        Display.UpdateComStatus("receive", receiveFrame.AGVID, " NAK Path", Color.Red);
                     }
 
 
@@ -268,47 +276,7 @@ namespace AGV_Form
             }
         }
 
-        public static void sendPath2Frame()
-        {   
-            AGV agv = AGV.ListAGV[0];
-            string pick, drop;
-            if (AGV.ListAGV[0].Tasks.Count == 0) return;
-            Task currentTask = agv.Tasks[0];
-
-            if (currentTask.PickLevel == 1 || currentTask.PickLevel == 2 || currentTask.PickLevel == 3)
-            {
-                pick = "P-" + currentTask.PickLevel.ToString() + "-";
-            }
-            else
-            {
-                pick = "N-0-";
-            }
-            if (currentTask.DropLevel == 1 || currentTask.DropLevel == 2 || currentTask.DropLevel == 3)
-            {
-                drop = "-D-" + currentTask.DropLevel.ToString();
-            }
-            else
-            {
-                drop = "-N-0";
-            }
-            try
-            {
-                //Debug.WriteLine("Send Path 2");
-                //AGV.FullPathOfAGV[agv.ID] = pick + agv.CurrentOrient.ToString() + "-" + Navigation.GetNavigationFrame(agv.Path[1], Node.MatrixNodeOrient) + drop;
-                //Communication.SendPathData(AGV.FullPathOfAGV[agv.ID]);
-                //DashboardForm.PathSend = AGV.FullPathOfAGV[agv.ID];
-                //agv.Tasks.Clear();
-                //agv.Path.Clear();
-                // agv.Path.Clear();
-                //agv.Tasks.Remove(currentTask);
-                // agv.Tasks.Clear();
-
-
-            }
-            catch { }
-
-
-        }
+        
 
        
        
@@ -349,7 +317,7 @@ namespace AGV_Form
             //sendFrame.CheckSum = 0xFFFF;
             sendFrame.EndOfFrame = new byte[2] { 0x0A, 0x0D };
             try { Communication.SerialPort.Write(sendFrame.ToArray(), 0, sendFrame.ToArray().Length); }
-            catch { Debug.WriteLine("SENDATA ERROR"); };
+            catch {  };
             // wait ack
 
         }
